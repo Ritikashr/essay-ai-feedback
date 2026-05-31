@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EssayAI — Intelligent Essay Feedback</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+         :root {
+            --primary: #3f51b5;
+            --primary-light: #e8eaf6;
+            --primary-dark: #283593;
+            --success: #2e7d32;
+            --success-light: #e8f5e9;
+            --warning: #e65100;
+            --warning-light: #fff3e0;
+            --danger: #c62828;
+            --danger-light: #ffebee;
+            --text: #1a1a2e;
+            --text-muted: #5f6368;
+            --border: #e0e0e0;
+            --bg: #f8f9ff;
+            --card: #ffffff;
+            --radius: 10px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        /* NAV */
+        
+        nav {
+            background: var(--primary);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            box-shadow: 0 2px 8px rgba(63, 81, 181, 0.3);
+        }
+        
+        .nav-brand {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-brand span {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        /* HERO */
+        
+        .hero {
+            text-align: center;
+            padding: 48px 24px 32px;
+        }
+        
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        
+        .hero h1 em {
+            color: var(--primary);
+            font-style: normal;
+        }
+        
+        .hero p {
+            font-size: 16px;
+            color: var(--text-muted);
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        /* MAIN LAYOUT */
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px 60px;
+        }
+        
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+            align-items: start;
+        }
+        /* EDITOR CARD */
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        
+        .card-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+        
+        textarea#essay {
+            width: 100%;
+            min-height: 340px;
+            border: none;
+            outline: none;
+            padding: 18px;
+            font-size: 15px;
+            line-height: 1.7;
+            resize: vertical;
+            font-family: inherit;
+            color: var(--text);
+            background: transparent;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        
+        .editor-footer {
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .word-count {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .btn-analyze {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        
+        .btn-analyze:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-analyze:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-analyze:disabled {
+            background: #9e9e9e;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* SETTINGS CARD */
+        
+        .settings-card {
+            margin-bottom: 16px;
+        }
+        
+        .settings-body {
+            padding: 14px 18px;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .setting-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .setting-label {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .setting-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+        
+        select.setting-select {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: var(--text);
+            background: var(--bg);
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .toggle {
+            width: 36px;
+            height: 20px;
+            background: #ccc;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .toggle.on {
+            background: var(--primary);
+        }
+        
+        .toggle::after {
+            content: '';
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: left 0.2s;
+        }
+        
+        .toggle.on::after {
+            left: 19px;
+        }
+        /* RESULTS PANEL */
+        
+        .results-panel {
+            display: none;
+        }
+        
+        .results-panel.visible {
+            display: block;
+        }
+        /* SCORE CARD */
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 16px 18px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-ring {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 6px;
+            position: relative;
+        }
+        
+        .score-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .score-ring .track {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 4;
+        }
+        
+        .score-ring .fill {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+        
+        .score-ring .label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .score-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        /* FEEDBACK SECTIONS */
+        
+        .feedback-section {
+            padding: 0 18px 16px;
+        }
+        
+        .feedback-section+.feedback-section {
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+        
+        .fb-heading {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .suggestion-item {
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            border-left: 3px solid;
+        }
+        
+        .suggestion-item.good {
+            background: var(--success-light);
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .suggestion-item.warn {
+            background: var(--warning-light);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+        
+        .suggestion-item.bad {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
+        .suggestion-item .si-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .suggestion-item .si-body {
+            color: var(--text);
+            opacity: 0.9;
+        }
+        /* LOADING */
+        
+        .loading-state {
+            padding: 32px 18px;
+            text-align: center;
+            display: none;
+        }
+        
+        .loading-state.visible {
+            display: block;
+        }
+        
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loading-text {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        .loading-step {
+            font-size: 12px;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+        /* EMPTY STATE */
+        
+        .empty-state {
+            padding: 32px 18px;
+            text-align: center;
+        }
+        
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .empty-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        
+        .empty-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        /* OVERALL BADGE */
+        
+        .overall-score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .os-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        
+        .os-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .os-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        /* TAGS */
+        
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        
+        .tag {
+            font-size: 11px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-weight: 500;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        /* EXAMPLE BUTTONS */
+        
+        .examples {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .examples span {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .ex-btn {
+            font-size: 12px;
+            padding: 5px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        
+        .ex-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        @media (max-width: 768px) {
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+            .score-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            nav {
+                padding: 0 16px;
+            }
+            .hero {
+                padding: 28px 16px 20px;
+            }
+            .hero h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-brand">
+            ✍️ EssayAI <span>Beta</span>
+        </div>
+        <div class="nav-links">
+            <a href="https://github.com/Ritikashr/essay-ai-feedback" target="_blank">GitHub</a>
+            <a href="https://linkedin.com/in/ritika-shrivastava-819707240" target="_blank">About</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Get <em>instant AI feedback</em> on your essay</h1>
+        <p>Paste your essay below. Our AI reviews clarity, structure, grammar, and tone — and gives you actionable suggestions.</p>
+    </div>
+
+    <div class="container">
+
+        <div class="examples">
+            <span>Try an example:</span>
+            <button class="ex-btn" onclick="loadExample('climate')">🌍 Climate Change</button>
+            <button class="ex-btn" onclick="loadExample('tech')">💻 Technology & Society</button>
+            <button class="ex-btn" onclick="loadExample('education')">📚 Education Reform</button>
+        </div>
+
+        <div class="editor-layout">
+
+            <!-- LEFT: EDITOR -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>                            Your Essay
+                        </div>
+                        <button onclick="clearEssay()" style="font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">Clear</button>
+                    </div>
+                    <textarea id="essay" placeholder="Paste or type your essay here...&#10;&#10;Tip: Essays of 200–1000 words get the most detailed feedback." oninput="updateWordCount()"></textarea>
+                    <div class="editor-footer">
+                        <span class="word-count" id="wordCount">0 words</span>
+                        <button class="btn-analyze" id="analyzeBtn" onclick="analyzeEssay()">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            Analyze Essay
+          </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: SETTINGS + RESULTS -->
+            <div>
+
+                <!-- SETTINGS -->
+                <div class="card settings-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>                            Feedback Settings
+                        </div>
+                    </div>
+                    <div class="settings-body">
+                        <div class="setting-row">
+                            <div>
+                                <div class="setting-label">Essay type</div>
+                                <div class="setting-sub">Adjusts evaluation criteria</div>
+                            </div>
+                            <select class="setting-select" id="essayType">
+              <option value="academic">Academic</option>
+              <option value="persuasive">Persuasive</option>
+              <option value="narrative">Narrative</option>
+              <option value="technical">Technical</option>
+            </select>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="setting-label">Target audience</div>
+                                <div class="setting-sub">Tunes tone suggestions</div>
+                            </div>
+                            <select class="setting-select" id="audience">
+              <option value="general">General</option>
+              <option value="academic">Academic</option>
+              <option value="professional">Professional</option>
+              <option value="student">Student</option>
+            </select>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="setting-label">Check grammar</div>
+                            </div>
+                            <div class="toggle on" id="toggleGrammar" onclick="this.classList.toggle('on')"></div>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="setting-label">Suggest improvements</div>
+                            </div>
+                            <div class="toggle on" id="toggleSuggest" onclick="this.classList.toggle('on')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESULTS CARD -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>                            AI Feedback
+                        </div>
+                    </div>
+
+                    <!-- EMPTY STATE -->
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-title">No analysis yet</div>
+                        <div class="empty-sub">Paste your essay and click Analyze to get detailed AI feedback.</div>
+                    </div>
+
+                    <!-- LOADING STATE -->
+                    <div class="loading-state" id="loadingState">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Analyzing your essay...</div>
+                        <div class="loading-step" id="loadingStep">Reading content...</div>
+                    </div>
+
+                    <!-- RESULTS -->
+                    <div class="results-panel" id="resultsPanel">
+
+                        <div class="overall-score">
+                            <div class="os-circle" id="osCircle">—</div>
+                            <div>
+                                <div class="os-label">Overall score</div>
+                                <div class="os-title" id="osTitle">—</div>
+                            </div>
+                        </div>
+
+                        <div class="score-grid" id="scoreGrid"></div>
+
+                        <div class="feedback-section" id="strengthsSection">
+                            <div class="fb-heading">✅ Strengths</div>
+                            <div id="strengthsList"></div>
+                        </div>
+
+                        <div class="feedback-section" id="improvementsSection">
+                            <div class="fb-heading">⚠️ Areas to improve</div>
+                            <div id="improvementsList"></div>
+                        </div>
+
+                        <div class="feedback-section" id="keywordsSection">
+                            <div class="fb-heading">🏷️ Key themes detected</div>
+                            <div class="tag-row" id="tagList"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EXAMPLES = {
+            climate: `Climate change represents one of the most pressing challenges of our time. Rising global temperatures, caused primarily by human activities such as burning fossil fuels and deforestation, are leading to severe consequences including rising sea levels, extreme weather events, and the disruption of ecosystems worldwide.\n\nGovernments, businesses, and individuals all have a role to play in addressing this crisis. Policy measures such as carbon pricing, investment in renewable energy, and stricter emissions regulations are essential steps. However, technological innovation alone is not sufficient. Cultural and behavioral change is equally important.\n\nIn conclusion, tackling climate change requires a coordinated global effort. The costs of inaction far outweigh the investments needed today. If we act decisively now, we can secure a sustainable future for generations to come.`,
+            tech: `Technology has transformed nearly every aspect of modern society, from the way we communicate to how we work and learn. The rise of artificial intelligence, automation, and digital connectivity offers unprecedented opportunities for human progress. Yet these advances also raise profound questions about privacy, inequality, and the nature of work itself.\n\nProponents argue that technology creates more jobs than it destroys and raises living standards overall. Critics, however, point to growing economic inequality as the benefits of automation accrue disproportionately to those who own the technology. The digital divide means that not everyone has equal access to these tools and opportunities.\n\nSociety must ensure that technological progress is guided by ethical principles and inclusive policies. Only then can technology truly serve as a force for good rather than a driver of division.`,
+            education: `The traditional model of education, characterized by standardized curricula, rote memorization, and high-stakes testing, is increasingly at odds with the demands of the 21st century. Employers today seek workers who are adaptable, creative, and capable of critical thinking — qualities that conventional schooling often fails to nurture.\n\nReforming education requires moving away from a one-size-fits-all approach. Project-based learning, personalized instruction enabled by technology, and greater emphasis on social-emotional skills can better prepare students for the complexities of modern life. Finland's education system is frequently cited as a model, prioritizing student well-being and teacher autonomy over standardized tests.\n\nWhile reform is challenging and context-dependent, the status quo is not acceptable. Investing in education reform is investing in the future of society itself.`
+        };
+
+        function loadExample(key) {
+            document.getElementById('essay').value = EXAMPLES[key];
+            updateWordCount();
+        }
+
+        function updateWordCount() {
+            const text = document.getElementById('essay').value.trim();
+            const count = text ? text.split(/\s+/).length : 0;
+            document.getElementById('wordCount').textContent = count + ' word' + (count !== 1 ? 's' : '');
+        }
+
+        function clearEssay() {
+            document.getElementById('essay').value = '';
+            updateWordCount();
+            showEmpty();
+        }
+
+        function showEmpty() {
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('loadingState').classList.remove('visible');
+            document.getElementById('resultsPanel').classList.remove('visible');
+        }
+
+        const LOADING_STEPS = [
+            'Reading content...',
+            'Evaluating structure...',
+            'Checking clarity and tone...',
+            'Identifying strengths...',
+            'Generating suggestions...',
+            'Finalizing feedback...'
+        ];
+
+        async function analyzeEssay() {
+            const essay = document.getElementById('essay').value.trim();
+            if (!essay || essay.length < 50) {
+                alert('Please enter an essay of at least 50 characters.');
+                return;
+            }
+
+            const essayType = document.getElementById('essayType').value;
+            const audience = document.getElementById('audience').value;
+            const checkGrammar = document.getElementById('toggleGrammar').classList.contains('on');
+            const suggestImprovements = document.getElementById('toggleSuggest').classList.contains('on');
+
+            const btn = document.getElementById('analyzeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite"></div> Analyzing...';
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsPanel').classList.remove('visible');
+            document.getElementById('loadingState').classList.add('visible');
+
+            let stepIdx = 0;
+            const stepEl = document.getElementById('loadingStep');
+            const stepInterval = setInterval(() => {
+                stepEl.textContent = LOADING_STEPS[stepIdx % LOADING_STEPS.length];
+                stepIdx++;
+            }, 700);
+
+            const prompt = `You are an expert essay writing coach. Analyze the following ${essayType} essay intended for a ${audience} audience.
+
+Return ONLY a valid JSON object (no markdown, no explanation) with this exact structure:
+{
+  "overall": <integer 1-100>,
+  "scores": {
+    "clarity": <integer 1-100>,
+    "structure": <integer 1-100>,
+    "grammar": <integer 1-100>,
+    "tone": <integer 1-100>
+  },
+  "strengths": [
+    {"title": "...", "detail": "..."},
+    {"title": "...", "detail": "..."},
+    {"title": "...", "detail": "..."}
+  ],
+  "improvements": [
+    {"title": "...", "detail": "..."},
+    {"title": "...", "detail": "..."},
+    {"title": "...", "detail": "..."}
+  ],
+  "keywords": ["...", "...", "...", "...", "..."]
+}
+
+${!checkGrammar ? 'Skip grammar checking.' : ''}
+${!suggestImprovements ? 'Only list strengths, no improvements.' : ''}
+
+Essay to analyze:
+"""
+${essay.substring(0, 3000)}
+"""`;
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': 'YOUR_API_KEY_HERE',
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: prompt
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const raw = data.content.map(b => b.text || '').join('');
+                const clean = raw.replace(/```json|```/g, '').trim();
+                const result = JSON.parse(clean);
+
+                clearInterval(stepInterval);
+                renderResults(result);
+            } catch (err) {
+                clearInterval(stepInterval);
+                console.error(err);
+                document.getElementById('loadingState').classList.remove('visible');
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('emptyState').innerHTML = '<div class="empty-icon">⚠️</div><div class="empty-title">Analysis failed</div><div class="empty-sub">Could not connect to the AI. Check your API key or try again.</div>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg> Analyze Essay';
+            }
+        }
+
+        function getScoreColor(score) {
+            if (score >= 80) return '#2e7d32';
+            if (score >= 60) return '#e65100';
+            return '#c62828';
+        }
+
+        function getOverallLabel(score) {
+            if (score >= 90) return 'Excellent';
+            if (score >= 75) return 'Good';
+            if (score >= 60) return 'Fair';
+            return 'Needs Work';
+        }
+
+        function renderScoreRing(score, color) {
+            const r = 22;
+            const circ = 2 * Math.PI * r;
+            const offset = circ - (score / 100) * circ;
+            return `
+    <svg viewBox="0 0 56 56">
+      <circle class="track" cx="28" cy="28" r="${r}"/>
+      <circle class="fill" cx="28" cy="28" r="${r}" stroke="${color}"
+        stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+    </svg>
+    <div class="label">${score}</div>
+  `;
+        }
+
+        function renderResults(result) {
+            document.getElementById('loadingState').classList.remove('visible');
+
+            const overall = result.overall || 72;
+            const color = getScoreColor(overall);
+
+            // Overall badge
+            const osCircle = document.getElementById('osCircle');
+            osCircle.style.background = color;
+            osCircle.textContent = overall;
+            document.getElementById('osTitle').textContent = getOverallLabel(overall);
+
+            // Score rings
+            const scoreNames = {
+                clarity: 'Clarity',
+                structure: 'Structure',
+                grammar: 'Grammar',
+                tone: 'Tone'
+            };
+            const scoreGrid = document.getElementById('scoreGrid');
+            scoreGrid.innerHTML = Object.entries(result.scores || {}).map(([key, val]) => `
+    <div class="score-item">
+      <div class="score-ring">${renderScoreRing(val, getScoreColor(val))}</div>
+      <div class="score-name">${scoreNames[key] || key}</div>
+    </div>
+  `).join('');
+
+            // Strengths
+            const strengthsList = document.getElementById('strengthsList');
+            strengthsList.innerHTML = (result.strengths || []).map(s => `
+    <div class="suggestion-item good">
+      <div class="si-title">${s.title}</div>
+      <div class="si-body">${s.detail}</div>
+    </div>
+  `).join('');
+
+            // Improvements
+            const improvementsList = document.getElementById('improvementsList');
+            improvementsList.innerHTML = (result.improvements || []).map(s => `
+    <div class="suggestion-item warn">
+      <div class="si-title">${s.title}</div>
+      <div class="si-body">${s.detail}</div>
+    </div>
+  `).join('');
+
+            // Keywords
+            const tagList = document.getElementById('tagList');
+            tagList.innerHTML = (result.keywords || []).map(k => `<span class="tag">${k}</span>`).join('');
+
+            document.getElementById('resultsPanel').classList.add('visible');
+        }
+    </script>
+</body>
+
+</html>
